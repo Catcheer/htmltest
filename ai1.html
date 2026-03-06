@@ -4,45 +4,42 @@
 <meta charset="UTF-8">
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
 </head>
-
 <body>
 
+<h1>ONNX Face Detector Test</h1>
+<input id="myfile" type="file" accept="image/*">
+<button onclick="start()">Start</button>
+
 <script>
-
-
-
-// 必须在所有 ort 操作之前设置
-ort.env.wasm.numThreads = 1;
-ort.env.wasm.simd = false;
-ort.env.wasm.proxy = false; // 有时禁用代理能解决特定的环境冲突
-
 let session = null;
 
+// 加载模型
 async function loadModel() {
-
-  session = await ort.InferenceSession.create('./FaceDetector_merged.onnx');
-
-  console.log("model loaded");
-
+    session = await ort.InferenceSession.create('./FaceDetector_merged.onnx');
+    console.log("Model loaded");
 }
-
 loadModel();
 
+async function start() {
+    if (!session) {
+        alert("Model not loaded yet!");
+        return;
+    }
 
-window.addEventListener("message", async (event) => {
-  console.log('addEventListener---------------------',event)
-  
+    const myfile = document.querySelector('#myfile').files[0];
+    if (!myfile) {
+        alert("Please select an image first!");
+        return;
+    }
 
-  const msg = JSON.parse(event.data);
+    // 用 FileReader 读取图片
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const img = new Image();
+        img.src = e.target.result;
 
-  if(msg.type === "image"){
-
-    const img = new Image();
-    img.src = "data:image/jpeg;base64," + msg.data;
-
-    img.onload = async () => {
-
-        // 创建画布 resize 到 224x224
+        img.onload = async () => {
+            // 创建画布 resize 到 224x224
             const canvas = document.createElement("canvas");
             canvas.width = 256;
             canvas.height = 256;
@@ -65,26 +62,19 @@ window.addEventListener("message", async (event) => {
             const feeds = { image: tensor };
             const results = await session.run(feeds);
 
-      const output = results[Object.keys(results)[0]].data;
-
-      window.ReactNativeWebView.postMessage(
-        JSON.stringify({
-          type:"result",
-          data:Array.from(output)
-        })
-      );
-
+            const output = results[Object.keys(results)[0]].data;
+            console.log("Inference result:", output);
+            alert("Inference finished, check console for result");
+        };
     };
 
-  }
-
-});
-
+    reader.readAsDataURL(myfile);
+}
 </script>
-<div>hhhh</div>
-<h1>hahhah1</h1>
-<h2>hahhah2</h2>
-<h2>hahhah3</h2>
+
+<input id="myfile" type="file" />
+
+<button onclick="start()">start</button>
 
 </body>
 </html>
