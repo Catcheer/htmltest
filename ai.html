@@ -12,6 +12,8 @@
 let session = null;
 
 async function loadModel() {
+   ort.env.wasm.numThreads = 1;  // 关闭多线程
+  ort.env.wasm.simd = false;    // 关闭SIMD
 
   session = await ort.InferenceSession.create('./FaceDetector_merged.onnx');
 
@@ -24,6 +26,7 @@ loadModel();
 
 window.addEventListener("message", async (event) => {
   console.log('addEventListener---------------------',event)
+  
 
   const msg = JSON.parse(event.data);
 
@@ -75,6 +78,7 @@ window.addEventListener("message", async (event) => {
 </script>
 <div>hhhh</div>
 <h1>hahhah1</h1>
+<h2>hahhah2</h2>
 
 </body>
 </html>
