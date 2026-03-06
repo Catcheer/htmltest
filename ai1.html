@@ -84,7 +84,7 @@ async function start() {
 <head>
     <meta charset="UTF-8">
     <title>ONNX 人脸检测测试</title>
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
     <style>
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
         #output { background: #f4f4f4; padding: 10px; border-radius: 5px; margin-top: 20px; white-space: pre-wrap; }
@@ -105,8 +105,7 @@ async function start() {
     <script>
         let session = null;
 
-        // 配置 WASM 路径，防止 TypeError: of[a] 报错
-        ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
+       
 
         // 初始化加载模型
         async function loadModel() {
@@ -114,7 +113,13 @@ async function start() {
                 log("正在加载模型...");
                 // 替换为你的模型路径
                 session = await ort.InferenceSession.create('./FaceDetector_merged.onnx?t=' + Date.now(),{
-    executionProviders: ['wasm'] 
+                    executionProviders: ['webgl'], // ⚡ 使用 GPU 加速
+    // executionProviders: ['wasm'] ,
+    graphOptimizationLevel: 'disabled', // 禁用图优化，减少内存占用
+    wasm: {
+                numThreads: 1,
+                memory: 128 * 1024 * 1024  // ⚡ 128MB 内存
+            }
 });
                 log("模型加载成功！");
             } catch (e) {
