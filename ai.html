@@ -129,20 +129,30 @@
         console.log('input------------', input)
         console.log("Model input names:", session.inputNames);
 
-        const tensor = new ort.Tensor("float32", input, [1, 3, 256, 256]);
-        const feeds = { image: tensor };
-        const results = await session.run(feeds);
+        // const tensor = new ort.Tensor("float32", input, [1, 3, 256, 256]);
+        // const feeds = { image: tensor };
+        // const results = await session.run(feeds);
 
-        console.log("results----------:", results);
+        try {
+          const tensor = new ort.Tensor("float32", input, [1, 3, 256, 256]);
+          log("推理中...");
+          const results = await session.run({ [session.inputNames[0]]: inputTensor });
+          console.log("results----------:", results);
+          const output = results[Object.keys(results)[0]].data;
 
-        const output = results[Object.keys(results)[0]].data;
+          window.ReactNativeWebView.postMessage(
+            JSON.stringify({
+              type: "result",
+              data: Array.from(output)
+            })
+          );
+        } catch (e) {
+          log("出错: " + e.message);
+        }
 
-        window.ReactNativeWebView.postMessage(
-          JSON.stringify({
-            type: "result",
-            data: Array.from(output)
-          })
-        );
+
+
+
 
       };
 
