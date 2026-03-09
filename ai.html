@@ -138,7 +138,8 @@
           console.log("推理中...");
           const results = await session.run({ [session.inputNames[0]]: inputTensor });
           console.log("results----------:", results);
-          const output = results[Object.keys(results)[0]].data;
+
+          const output = results.landmarks.cpuData || results.landmarks.data || results.landmarks;
 
           window.ReactNativeWebView.postMessage(
             JSON.stringify({
