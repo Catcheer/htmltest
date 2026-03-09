@@ -33,23 +33,26 @@
     }
 
     // 用 Promise 表示模型加载状态
-    let modelReady = loadModel();
+    // let modelReady = loadModel();
 
 
 
     window.addEventListener("message", async (event) => {
+      console.log('message-------------------------------------========================')
       console.log('addEventListener---------------------', event)
 
 
       const msg = JSON.parse(event.data);
+      console.log('msg-------------------------------------========================', msg)
 
       if (msg.type === "image") {
         // 等待模型加载完成
-        await modelReady;
+        await loadModel();
         const img = new Image();
         img.src = "data:image/jpeg;base64," + msg.data;
 
         img.onload = async () => {
+          console.log('img.onload-------------------------------------========================')
 
           // 创建画布 resize 到 224x224
           const canvas = document.createElement("canvas");
